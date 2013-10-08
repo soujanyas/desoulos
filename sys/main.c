@@ -1,8 +1,13 @@
 #include <defs.h>
 #include <sys/gdt.h>
+#include <sys/printf.h>
+#include <sys/idt.h>
+#include <sys/pic.h>
+#include <sys/timer.h>
 
 void start(uint32_t* modulep, void* physbase, void* physfree)
 {
+	int i;
 	struct smap_t {
 		uint64_t base, length;
 		uint32_t type;
@@ -12,6 +17,9 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
 		if (smap->type == 1 /* memory */ && smap->length != 0) {
 			printf("Available Physical Memory [%x-%x]\n", smap->base, smap->base + smap->length);
 		}
+	}
+	for(i=0;i<1024;i++){
+		printf("\nLine number %d",i);
 	}
 	// kernel starts here
 	while(1);
@@ -34,6 +42,10 @@ void boot(void)
 	);
 	reload_gdt();
 	setup_tss();
+	remap_pic(0x20,0x28);
+	load_idt();
+	configure_timer();
+	clrscr();
 	start(
 		(uint32_t*)((char*)(uint64_t)loader_stack[3] + (uint64_t)&kernmem - (uint64_t)&physbase),
 		&physbase,
