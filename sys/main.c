@@ -4,10 +4,12 @@
 #include <sys/idt.h>
 #include <sys/pic.h>
 #include <sys/timer.h>
+#include "pmap.h"
 
 void start(uint32_t* modulep, void* physbase, void* physfree)
 {
 	int i;
+	struct page_info* head = NULL;	
 	struct smap_t {
 		uint64_t base, length;
 		uint32_t type;
@@ -15,12 +17,18 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
 	while(modulep[0] != 0x9001) modulep += modulep[1]+2;
 	for(smap = (struct smap_t*)(modulep+2); smap < (struct smap_t*)((char*)modulep+modulep[1]+2*4); ++smap) {
 		if (smap->type == 1 /* memory */ && smap->length != 0) {
-			printf("Available Physical Memory [%x-%x]\n", smap->base, smap->base + smap->length);
+			printf("Available Physical Memory [%p-%p]\n", smap->base, smap->base + smap->length);
 		}
 	}
-	for(i=0;i<1024;i++){
-		printf("\nLine number %d",i);
+	init_placement_address(physfree);
+	for(i=0;i<3;i++){
+		head = add_to_free_list(head,i);
 	}
+	print_list(head);
+
+/*	for(i=0;i<1024;i++){
+		printf("\nLine number %d",i);
+	}*/
 	// kernel starts here
 	while(1);
 }
