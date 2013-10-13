@@ -8,8 +8,6 @@
 
 void start(uint32_t* modulep, void* physbase, void* physfree)
 {
-	int i;
-	struct page_info* head = NULL;	
 	struct smap_t {
 		uint64_t base, length;
 		uint32_t type;
@@ -18,17 +16,13 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
 	for(smap = (struct smap_t*)(modulep+2); smap < (struct smap_t*)((char*)modulep+modulep[1]+2*4); ++smap) {
 		if (smap->type == 1 /* memory */ && smap->length != 0) {
 			printf("Available Physical Memory [%p-%p]\n", smap->base, smap->base + smap->length);
+			printf("length of segment: %p", smap->length);
+			init_avail_memory(smap->base, smap->length, physfree);
 		}
 	}
-	init_placement_address(physfree);
-	for(i=0;i<3;i++){
-		head = add_to_free_list(head,i);
-	}
-	print_list(head);
+	
+	
 
-/*	for(i=0;i<1024;i++){
-		printf("\nLine number %d",i);
-	}*/
 	// kernel starts here
 	while(1);
 }
