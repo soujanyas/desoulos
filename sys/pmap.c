@@ -80,7 +80,6 @@ void init_avail_memory(uint64_t smap_base,uint64_t smap_length,void* physfree){
 		}
 		for(;temp < smap_base + smap_length; temp+=FOUR_KB_HEXA){
 			int page_num = temp/FOUR_KB_HEXA;
-			printf("Enquing page num %d",page_num);
 			tail = enqueue_free_list(tail, page_num);
 		}
 	}
