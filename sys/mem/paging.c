@@ -4,6 +4,11 @@
 #include<sys/printf.h>
 #define FOUR_KB_HEXA 0x1000
 #define BASE 0xffffffff80000000
+#define MASK 0x1ff
+#define PML4 1
+#define PDIRPTR 2
+#define PDIR 3
+#define PAGETABLE 4
 
 void init_pml4();
 void init_pdir_ptr();
@@ -130,4 +135,35 @@ void init_page_table(){
 	struct page_table_t* pt = (struct page_table_t*)(page_address);
 	debug("Initializing page_table at free page:%p\n",(page_address));
 	memset(pt,0,512*sizeof(struct page_table_t));//initialze to zero	
-}	
+}
+
+uint64_t get_va_index(uint64_t virtual_addr, int flag){
+	if(flag == PML4){
+		printf("virtual addr %p", virtual_addr);
+		virtual_addr = virtual_addr >> 39;
+		printf("shifted virtual addr %p", virtual_addr);
+		printf("MASK %p", MASK);
+		uint64_t index = virtual_addr & MASK; 
+		return index;
+	}
+	else if(flag == PDIRPTR){
+		virtual_addr = virtual_addr >> 30;
+		uint64_t index = virtual_addr & MASK; 
+		return index;
+	}
+	else if(flag == PDIR){
+		virtual_addr = virtual_addr >> 21;
+		uint64_t index = virtual_addr & MASK; 
+		return index;
+	}
+	else if(flag == PAGETABLE){
+		virtual_addr = virtual_addr >> 12;
+		uint64_t index = virtual_addr & MASK; 
+		return index;
+	}
+	else{
+		printf("Invalid flag passed to get_va_index()");
+		return 0;
+	}
+
+}

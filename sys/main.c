@@ -29,7 +29,7 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
 		}
 	}
 	info("\nInitializing pages..\n");
-	init_page_tables();	
+	init_page_tables();
 	// kernel starts here
 	while(1);
 }
