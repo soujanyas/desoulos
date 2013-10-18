@@ -184,16 +184,18 @@ void map_kernel(void *physbase, void *physfree){
 		add_pte( i, i-BASE, pt);
 		//currently accommodates only 512 entries
 	}
-	//struct page_table_t* pt1=init_page_table();
-	//for(i=BASE;i<BASE+1048576;i+=FOUR_KB_HEXA){
-	//	add_pte(i,i-BASE,pt1);
-	//}
-	//add_pde(BASE,(uint64_t)pt1, pdir);
+	/*This is totally ugly!!!!*/
+	struct page_table_t* pt1=init_page_table();
+	for(i=BASE+0xb8000;i<BASE+0xb8000+2*FOUR_KB_HEXA;i+=FOUR_KB_HEXA){
+		add_pte(i,i-BASE,pt1);
+	}
 	add_pde(BASE+(uint64_t)physbase,(uint64_t)pt, pdir);
+	add_pde(BASE,(uint64_t)pt1, pdir);
 	add_pdpe(BASE+(uint64_t)physbase,(uint64_t)pdir, pdpe);
 	add_pml4(BASE+(uint64_t)physbase,(uint64_t)pdpe, pml4);
 	load_cr3(pml4);
 }
+
 
 /*virtual_addr indicates the offset where the entry has to be created
 phys_addr gives value to be loaded onto pte entry*/
@@ -233,7 +235,7 @@ void add_pde(uint64_t virtual_addr, uint64_t phys_addr,  struct page_dir_t* pdir
 	pdir->pd_entries[pde_offset].pt_base_address = phys_addr>>12;
 	pdir->pd_entries[pde_offset].available = 0;
 	pdir->pd_entries[pde_offset].nx = 0;
-	debug("\nAdded pde entry:%x at location %p",pdir->pd_entries[pde_offset],pdir);
+	debug("\nAdded pde entry:%x at location %p",pdir->pd_entries[pde_offset],&pdir->pd_entries[pde_offset]);
 
 }
 
@@ -275,7 +277,7 @@ void add_pml4(uint64_t virtual_addr, uint64_t phys_addr,  struct pml4_t* pml4){
 	pml4->pml4_entries[pml4_offset].pdp_base_address = phys_addr>>12;
 	pml4->pml4_entries[pml4_offset].available = 0;
 	pml4->pml4_entries[pml4_offset].nx = 0;
-	//debug("\nAdded pml4 entry:%x at location %p",pml4->pml4_entries[pml4_offset],pml4);
+	debug("\nAdded pml4 entry:%x at location %p",pml4->pml4_entries[pml4_offset],pml4);
 }
 
 void load_cr3(struct pml4_t* pml4){
@@ -287,9 +289,10 @@ void load_cr3(struct pml4_t* pml4){
 	cr3.reserved2 = 0;
 	cr3.pml4_address = ((uint64_t)pml4) >> 12;
 	cr3.reserved3 = 0;
-	__asm__("cli;"
-		"movq %0,%%cr3;"
+	__asm__(
+		"movq %0,%%cr3"
 		:
 		:"b"(cr3)
 		);
+	info("\nCR3 register reloaded");
 }

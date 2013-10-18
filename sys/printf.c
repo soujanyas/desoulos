@@ -3,6 +3,7 @@
 #define DEBUG 0
 #define INFO 1
 #define ERROR 2
+#define VIDEO_MEMORY 0xffffffff800b8000
 
 void puts(int region, char *str);
 void putchar(int region, char ch);
@@ -121,7 +122,7 @@ void puts(int region,char* str){
 }
 
 void putchar(int region,char ch){
-         volatile register char* startaddress = (char*)0xb8000;
+         volatile register char* startaddress = (char*)VIDEO_MEMORY;
          volatile register char* address;
 	 if(region==0){
 	  address = startaddress+y[0]*VGA_WIDTH+x[0];
@@ -150,7 +151,7 @@ void putchar(int region,char ch){
 
 void roll_screen_up(){
 	int i;
-	volatile register char* startaddress = (char*)0xb8000;
+	volatile register char* startaddress = (char*)VIDEO_MEMORY;
 	for(i = 0;i<VGA_WIDTH*(VGA_HEIGHT);i++){
 		*(startaddress+i) = *(startaddress+VGA_WIDTH+i);	
 	}
@@ -158,7 +159,7 @@ void roll_screen_up(){
 }
 
 extern void clrscr(){
-        volatile register char* startaddress = (char*)0xb8000;
+        volatile register char* startaddress = (char*)VIDEO_MEMORY;
 	volatile register char* address;
 	for(y[0]=0;y[0]<VGA_HEIGHT+1;y[0]++){
 	  for(x[0]=0;x[0]<VGA_WIDTH;x[0]+=1){
