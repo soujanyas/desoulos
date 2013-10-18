@@ -13,10 +13,10 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
 		uint64_t base, length;
 		uint32_t type;
 	}__attribute__((packed)) *smap;
-	volatile int i =1;
+//	volatile int i =1;
 	printf("module p is; %x, modulep[0]: %x",modulep,modulep[0]);
 
-	while(i);
+//	while(i);
 	while(modulep[0] != 0x9001){ 
 		modulep += modulep[1]+2;
 		debug("Modulep : %p modulep[0]: %x\n",modulep,modulep[0]);
