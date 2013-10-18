@@ -29,7 +29,8 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
 		}
 	}
 	info("\nInitializing pages..\n");
-	init_page_tables();
+//	init_page_tables();
+	map_kernel(physbase,physfree);
 	// kernel starts here
 	while(1);
 }
