@@ -139,31 +139,25 @@ void init_page_table(){
 
 uint64_t get_va_index(uint64_t virtual_addr, int flag){
 	if(flag == PML4){
-		printf("virtual addr %p", virtual_addr);
 		virtual_addr = virtual_addr >> 39;
-		printf("shifted virtual addr %p", virtual_addr);
-		printf("MASK %p", MASK);
-		uint64_t index = virtual_addr & MASK; 
-		return index;
 	}
 	else if(flag == PDIRPTR){
 		virtual_addr = virtual_addr >> 30;
-		uint64_t index = virtual_addr & MASK; 
-		return index;
 	}
 	else if(flag == PDIR){
 		virtual_addr = virtual_addr >> 21;
-		uint64_t index = virtual_addr & MASK; 
-		return index;
 	}
 	else if(flag == PAGETABLE){
 		virtual_addr = virtual_addr >> 12;
-		uint64_t index = virtual_addr & MASK; 
-		return index;
 	}
-	else{
+	else{	
 		printf("Invalid flag passed to get_va_index()");
-		return 0;
+		return -1;
 	}
+	uint64_t index = virtual_addr & MASK;
+	return index;
+	
+	
+	
 
 }
