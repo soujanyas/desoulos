@@ -1,5 +1,5 @@
-#include<stdio.h>
 #include<defs.h>
+#include<sys/printf.h>
 #define PAGE_ALIGN_FALSE 0
 #define PAGE_ALIGN_TRUE 1
 #define FOUR_KB_HEXA 0x1000
@@ -7,7 +7,7 @@
 
 
 typedef struct page_info{
-	int page_num;
+	uint64_t page_num;
 	struct page_info* next;
 }page_info_t;
 
@@ -47,11 +47,24 @@ struct page_info* enqueue_free_list(PAGE_INFO tail, int page_num){
 	return tail;
 }
 
+uint64_t get_free_page(){
+	if(free_list_head != NULL){
+		uint64_t free_page = free_list_head->page_num;
+		free_list_head = free_list_head->next;
+		return free_page;
+	}	
+	else{
+		error("Exiting: no free pages available");
+		return 0;
+//		exit(-1);
+	}
+}
+
 void print_list(){
 	if(free_list_head == NULL) return;
 	PAGE_INFO temp = free_list_head;
 	while(temp != NULL){
-		printf("Node content:%d next:%p\n",temp->page_num,temp->next);
+	//	printf("Node content:%d next:%p\n",temp->page_num,temp->next);
 		temp = temp->next;
 	}
 }
@@ -62,7 +75,7 @@ void* init_placement_address(void* pa){
 	} else{
 		placement_address = (void*)(((uint64_t)pa)&0xfffff000)+0x1000;
 	}
-	printf("placement_address %p",placement_address);
+	debug("placement_address %p\n",placement_address);
 	return placement_address;
 }
 

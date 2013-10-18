@@ -1,11 +1,19 @@
 #include <defs.h>
 
+#define DEBUG 0
+#define INFO 1
+#define ERROR 2
+
 void puts(int region, char *str);
 void putchar(int region, char ch);
 char* int_to_str(int integer, char *str, int base);
 char* address_to_str(unsigned long address,char *str);
 void roll_screen_up();
 void print_region(int region, const char* str,__builtin_va_list);
+
+int debug_enabled = 0;
+int info_enabled = 1;
+int error_enabled = 1;
 
 int y[3] = {0,24,24}, x[3] = {0,130,124};
 const int VGA_WIDTH = 160;
@@ -33,6 +41,29 @@ void printKb(const char* str,...){
 	y[2]=24;
 }
 
+void debug(const char* str,...){
+	if(debug_enabled){
+	        __builtin_va_list args;
+		__builtin_va_start(args,str);
+		print_region(0,str,args);
+	}	
+}
+
+void info(const char* str,...){
+	if(info_enabled){
+	        __builtin_va_list args;
+		__builtin_va_start(args,str);
+		print_region(0,str,args);
+	}	
+}
+
+void error(const char* str,...){
+	if(error_enabled){
+	        __builtin_va_list args;
+		__builtin_va_start(args,str);
+		print_region(0,str,args);
+	}	
+}
 void print_region(int region, const char* str,__builtin_va_list args){
 	char *mystr;
 	char buff[100];
@@ -204,5 +235,18 @@ char* address_to_str(unsigned long hexnumber,char *hex_str){
 	}
 	hex_str[18]='\0';
 	return hex_str;
+}
+
+void set_debug_level(int debug_level){
+	if(debug_level == DEBUG){	
+		debug_enabled = 1;
+		info_enabled = 1;
+		error_enabled = 1;
+	} else if ( debug_enabled == INFO){
+		info_enabled = 1;
+		error_enabled = 1;
+	} else if (debug_enabled == ERROR){
+		error_enabled = 1;
+	}
 }
 
