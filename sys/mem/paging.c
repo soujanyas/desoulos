@@ -139,9 +139,9 @@ uint64_t get_va_index(uint64_t virtual_addr, int flag){
 		virtual_addr = virtual_addr >> 30;
 	}
 	else if(flag == PDIR){
-		debug("\n ENTER virtual address %p",virtual_addr);
+//		debug("\n ENTER virtual address %p",virtual_addr);
 		virtual_addr = virtual_addr >> 21;
-		debug("\nEXIT virtual address %p",virtual_addr);
+//		debug("\nEXIT virtual address %p",virtual_addr);
 	}
 	else if(flag == PAGETABLE){
 		virtual_addr = virtual_addr >> 12;
@@ -184,6 +184,11 @@ void map_kernel(void *physbase, void *physfree){
 		add_pte( i, i-BASE, pt);
 		//currently accommodates only 512 entries
 	}
+	//struct page_table_t* pt1=init_page_table();
+	//for(i=BASE;i<BASE+1048576;i+=FOUR_KB_HEXA){
+	//	add_pte(i,i-BASE,pt1);
+	//}
+	//add_pde(BASE,(uint64_t)pt1, pdir);
 	add_pde(BASE+(uint64_t)physbase,(uint64_t)pt, pdir);
 	add_pdpe(BASE+(uint64_t)physbase,(uint64_t)pdir, pdpe);
 	add_pml4(BASE+(uint64_t)physbase,(uint64_t)pdpe, pml4);
@@ -275,20 +280,16 @@ void add_pml4(uint64_t virtual_addr, uint64_t phys_addr,  struct pml4_t* pml4){
 
 void load_cr3(struct pml4_t* pml4){
 	struct cr3_t cr3;
-	uint64_t cr3_content=0;
+
 	cr3.reserved = 0;
 	cr3.pwt=1;
 	cr3.pcd = 0;
 	cr3.reserved2 = 0;
 	cr3.pml4_address = ((uint64_t)pml4) >> 12;
 	cr3.reserved3 = 0;
-	debug("\nContents getting loaded onto cr3 %p",cr3);
-
-	__asm__("movq %1,%%cr3;"
-		"movq %%cr3,%0;"
-		:"=r"(cr3_content)
+	__asm__("cli;"
+		"movq %0,%%cr3;"
+		:
 		:"b"(cr3)
 		);
-
-	printf("Contents of cr3 %p",0x123);	
 }
