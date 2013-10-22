@@ -196,6 +196,44 @@ void map_kernel(void *physbase, void *physfree){
 	load_cr3(pml4);
 }
 
+int new_structure_level(uint64_t virtual_addr, struct pml4_t* pml4){
+	uint64_t pml4_offset = get_va_index(virtual_addr, PML4);
+	uint64_t pdpe_offset = get_va_index(virtual_addr, PDIRPTR);
+	uint64_t pde_offset = get_va_index(virtual_addr, PDIR);
+	uint64_t pte_offset = get_va_index(virtual_addr, PAGETABLE);
+
+	if(pml4->pml4_entries[pml4_offset].present == 0){
+		return PML4;
+	}
+	else{
+		uint64_t pdp_base_address = (pml4->pml4_entries[pml4_offset].pdp_base_address)<<12;
+		struct pdir_ptr_t* pdp = (struct pdir_ptr_t*)pdp_base_address;
+	 
+	 
+		if(pdp->pdp_entries[pdpe_offset].present == 0){
+	 		return PDIRPTR;
+	 	}
+		else{
+			uint64_t pd_base_address = (pdp->pdp_entries[pdpe_offset].pd_base_address)<<12;
+			struct page_dir_t* pd = (struct page_dir_t*)pd_base_address;
+			if(pd->pd_entries[pde_offset].present == 0){
+				return PDIR;
+			}
+			else{
+				uint64_t pt_base_address = (pd->pd_entries[pde_offset].pt_base_address)<<12;
+				struct page_table_t* pt =(struct page_table_t*)pt_base_address;
+				if(pt->pt_entries[pte_offset].present ==0){
+					return PAGETABLE;
+				}
+				else{	
+					error("page table entry already exists");
+					return -1;
+				}
+			}
+		}
+	}
+
+}
 
 /*virtual_addr indicates the offset where the entry has to be created
 phys_addr gives value to be loaded onto pte entry*/

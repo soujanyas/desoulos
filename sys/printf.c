@@ -242,12 +242,12 @@ void set_debug_level(int debug_level){
 	if(debug_level == DEBUG){	
 		debug_enabled = 1;
 		info_enabled = 1;
-		error_enabled = 1;
-	} else if ( debug_enabled == INFO){
+	} else if ( debug_level == INFO){
+		debug_enabled = 0;
 		info_enabled = 1;
-		error_enabled = 1;
-	} else if (debug_enabled == ERROR){
-		error_enabled = 1;
+	} else if (debug_level == ERROR){
+		debug_enabled = 0;
+		info_enabled = 0;
 	}
 }
 
